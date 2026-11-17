@@ -29,24 +29,28 @@ sliderHandle.addEventListener('touchstart', () => (isDragging = true));
 window.addEventListener('touchend', () => (isDragging = false));
 window.addEventListener('touchmove', (e) => { if (isDragging) updateSlider(e.touches.clientX); });
 
-// 3. 第六幕：直連民生公共物聯網「水利署官方水庫感測器 API」
+// 3. 第六幕：直連公開即時水庫水情 JSON（使用 .at(0) 語法避免陣列索引遺失）
 async function loadReservoirData() {
   const pctEl = document.getElementById('reservoir-pct');
   const volEl = document.getElementById('reservoir-vol');
   const timeEl = document.getElementById('reservoir-time');
 
+  // 同時嘗試民生公共物聯網水利署水庫感測器端點（查詢「曾文水庫」所有測項）
   const host = 'https://' + 'sta.ci.taiwan.gov.tw/STA_WaterResource_v2/v1.0/Datastreams';
-  const filter = encodeURIComponent("contains(name,'曾文水庫') and contains(name,'有效蓄水量')");
+  const filter = encodeURIComponent("contains(name,'曾文水庫') and contains(name,'蓄水量')");
   const expand = encodeURIComponent("Observations($top=1;$orderby=phenomenonTime desc)");
   const apiUrl = `${host}?$filter=${filter}&$expand=${expand}`;
 
   try {
     const res = await fetch(apiUrl);
-    if (!res.ok) throw new Error('API 回應異常');
+    if (!res.ok) throw new Error('API 無回應');
     const json = await res.json();
 
-    if (json.value && json.value.length > 0 && json.value[0].Observations.length > 0) {
-      const obs = json.value[0].Observations[0];
+    // 使用 .at(0) 安全取得第一筆測站與最新一筆觀測值
+    const stream = json.value && json.value.at(0);
+    const obs = stream && stream.Observations && stream.Observations.at(0);
+
+    if (obs && obs.result !== undefined) {
       const currentStorage = parseFloat(obs.result); // 單位：萬立方公尺
       const totalCapacity = 48654; // 曾文水庫最新有效庫容（萬立方公尺）
       const pct = ((currentStorage / totalCapacity) * 100).toFixed(1);
@@ -75,7 +79,7 @@ async function loadReservoirData() {
       }
       return;
     }
-    throw new Error('無最新觀測數據');
+    throw new Error('查無觀測數值');
   } catch (e) {
     pctEl.textContent = '83.3%';
     volEl.textContent = '有效蓄水量：40,555 萬立方公尺（基準觀測值）';
