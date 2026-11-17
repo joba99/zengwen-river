@@ -35,23 +35,22 @@ async function loadReservoirData() {
   const volEl = document.getElementById('reservoir-vol');
   const timeEl = document.getElementById('reservoir-time');
 
-  // 組合台灣民生公共物聯網 (sta.ci.taiwan.gov.tw) 水利署水庫資料流端點
   const host = 'https://' + 'sta.ci.taiwan.gov.tw/STA_WaterResource_v2/v1.0/Datastreams';
-  const query = "?$filter=contains(name,'曾文水庫') and contains(name,'有效蓄水量')&$expand=Observations($top=1;$orderby=phenomenonTime desc)";
-  const apiUrl = host + encodeURI(query);
+  const filter = encodeURIComponent("contains(name,'曾文水庫') and contains(name,'有效蓄水量')");
+  const expand = encodeURIComponent("Observations($top=1;$orderby=phenomenonTime desc)");
+  const apiUrl = `${host}?$filter=${filter}&$expand=${expand}`;
 
   try {
     const res = await fetch(apiUrl);
     if (!res.ok) throw new Error('API 回應異常');
     const json = await res.json();
 
-    if (json.value && json.value.length > 0 && json.value.Observations.length > 0) {
-      const obs = json.value.Observations;
+    if (json.value && json.value.length > 0 && json.value[0].Observations.length > 0) {
+      const obs = json.value[0].Observations[0];
       const currentStorage = parseFloat(obs.result); // 單位：萬立方公尺
       const totalCapacity = 48654; // 曾文水庫最新有效庫容（萬立方公尺）
       const pct = ((currentStorage / totalCapacity) * 100).toFixed(1);
 
-      // 轉換 UTC 時間為台灣時間 (UTC+8)
       const dateObj = new Date(obs.phenomenonTime);
       const twTime = dateObj.toLocaleString('zh-TW', {
         timeZone: 'Asia/Taipei',
@@ -85,3 +84,5 @@ async function loadReservoirData() {
 }
 
 loadReservoirData();
+
+
