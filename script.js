@@ -96,19 +96,26 @@ let map, historyLayer;
 
 function initHistoryMap() {
   const mapContainer = document.getElementById('historyMap');
-  if (!mapContainer || typeof L === 'undefined') return;
+  if (!mapContainer) return;
+
+  // 若 Leaflet 尚未載入完成，延遲 0.5 秒重試
+  if (typeof L === 'undefined') {
+    setTimeout(initHistoryMap, 500);
+    return;
+  }
 
   // 預設座標對準曾文溪中下游與台江內海交界（麻豆、善化、七股一帶）
   map = L.map('historyMap').setView([23.135, 120.165], 12);
 
-  // 底層：現代衛星影像（Esri World Imagery）
-  L.tileLayer('https://arcgisonline.com{z}/{y}/{x}', {
+  // 底層：現代衛星影像（使用字串拼接避免複製時網址被縮短）
+  const esriHost = 'https://' + '://arcgisonline.com{z}/{y}/{x}';
+  L.tileLayer(esriHost, {
     attribution: '現代衛星底圖 © Esri'
   }).addTo(map);
 
   // 疊加層：中研院 1904 年《臺灣堡圖》
-  const wmtsUrl = 'https://sinica.edu.tw{z}-{x}-{y}';
-  historyLayer = L.tileLayer(wmtsUrl, {
+  const sinicaHost = 'https://' + 'gis.sinica.edu.tw/tileserver/file-exists.php?img=JM20K_1904-jpg-{z}-{x}-{y}';
+  historyLayer = L.tileLayer(sinicaHost, {
     opacity: 0.8,
     attribution: '歷史地圖 © 中央研究院'
   }).addTo(map);
@@ -126,6 +133,9 @@ function initHistoryMap() {
     opacityVal.textContent = val + '%';
     if (historyLayer) historyLayer.setOpacity(val / 100);
   });
+
+  // 確保地圖容器尺寸完全展開，避免灰屏
+  setTimeout(() => { map.invalidateSize(); }, 400);
 }
 
 // 切換不同年代的歷史地圖圖層
@@ -134,7 +144,7 @@ window.switchHistoryLayer = function(layerCode, btnEl) {
   document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
   btnEl.classList.add('active');
 
-  const newUrl = `https://sinica.edu.tw{layerCode}-jpg-{z}-{x}-{y}`;
+  const newUrl = 'https://' + `gis.sinica.edu.tw/tileserver/file-exists.php?img=${layerCode}-jpg-{z}-{x}-{y}`;
   historyLayer.setUrl(newUrl);
 };
 
