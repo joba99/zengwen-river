@@ -33,8 +33,7 @@ async function loadReservoirData() {
   const volEl = document.getElementById('reservoir-vol');
   const timeEl = document.getElementById('reservoir-time');
 
-  const jsonUrl = 'https://data.wra.gov.tw/Service/OpenData/Reservoir/Reservoir.json';
-
+  const jsonUrl = 'https://' + '://githubusercontent.com';
 
   try {
     const res = await fetch(jsonUrl);
