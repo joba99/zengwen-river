@@ -33,7 +33,8 @@ async function loadReservoirData() {
   const volEl = document.getElementById('reservoir-vol');
   const timeEl = document.getElementById('reservoir-time');
 
-  const jsonUrl = 'https://' + '://githubusercontent.com/taiwanstat/reservoir-visual/master/data/data.json';
+  const jsonUrl = 'https://data.wra.gov.tw/Service/OpenData/Reservoir/Reservoir.json';
+
 
   try {
     const res = await fetch(jsonUrl);
