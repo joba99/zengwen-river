@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>重返曾文溪｜第四紀至今的流域傳記與水文復興</title>
+  <link rel="stylesheet" href="https://unpkg.com" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -131,6 +132,22 @@
       <span class="tag forest">Chapter 06｜水文復興的起點</span>
       <h2>從看見傷痕開始，成為流域的記錄者</h2>
       <p class="lead center">我們無法將晶圓廠變回史前濕地，但不能讓百萬年的演化記憶被抹去。水文復興的第一步，是重新看見這條河的完整生命史。</p>
+         <!-- 中研院百年歷史地圖互動視窗 -->
+   <div class="map-box">
+     <div class="map-controls">
+       <div class="map-layers">
+         <button class="map-btn active" onclick="switchHistoryLayer('JM20K_1904', this)">1904 臺灣堡圖</button>
+         <button class="map-btn" onclick="switchHistoryLayer('JM20K_1921', this)">1921 臺灣堡圖</button>
+         <button class="map-btn" onclick="switchHistoryLayer('AM50K_1944', this)">1944 美軍地形圖</button>
+       </div>
+       <div class="map-opacity">
+         <label for="opacitySlider">歷史圖層透明度：<span id="opacityVal">80%</span></label>
+         <input type="range" id="opacitySlider" min="0" max="100" value="80" />
+       </div>
+     </div>
+     <div id="historyMap"></div>
+     <p class="map-caption">圖資來源：中央研究院人社中心 GIS 專題中心《臺灣百年歷史地圖》WMTS 服務（預設視角：曾文溪下游與台江內海變遷區）</p>
+   </div>
       <div class="grid-3" style="margin-top: 2rem;">
         <div class="card act-card" onclick="alert('【功能規劃中】將串接中研院百年歷史地圖！')"><h3>01｜探索百年流域地圖</h3><p>疊合日治堡圖與現代衛星圖，追蹤台江內海陸化與糖鐵、水圳如何改變平原地景。</p></div>
         <div class="card act-card" onclick="alert('【功能規劃中】將提供左鎮化石園區至山美達娜伊谷的走讀路線！')"><h3>02｜傷痕與重生踏查路線</h3><p>親自走訪菜寮溪化石河谷、東口導水堰與阿里山南三村，用雙腳丈量河流的生死分界。</p></div>
@@ -140,6 +157,7 @@
   </section>
 
   <footer>曾文溪水文復興倡議原型｜從第四紀百萬年尺度出發，重新認識台灣的母親河</footer>
+  <script src="https://unpkg.com"></script>
   <script src="script.js"></script>
 </body>
 </html>

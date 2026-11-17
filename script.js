@@ -90,3 +90,52 @@ async function loadReservoirData() {
 }
 
 loadReservoirData();
+
+// 4. 第七幕：中研院《臺灣百年歷史地圖》WMTS 互動地圖模組
+let map, historyLayer;
+
+function initHistoryMap() {
+  const mapContainer = document.getElementById('historyMap');
+  if (!mapContainer || typeof L === 'undefined') return;
+
+  // 預設座標對準曾文溪中下游與台江內海交界（麻豆、善化、七股一帶）
+  map = L.map('historyMap').setView([23.135, 120.165], 12);
+
+  // 底層：現代衛星影像（Esri World Imagery）
+  L.tileLayer('https://arcgisonline.com{z}/{y}/{x}', {
+    attribution: '現代衛星底圖 © Esri'
+  }).addTo(map);
+
+  // 疊加層：中研院 1904 年《臺灣堡圖》
+  const wmtsUrl = 'https://sinica.edu.tw{z}-{x}-{y}';
+  historyLayer = L.tileLayer(wmtsUrl, {
+    opacity: 0.8,
+    attribution: '歷史地圖 © 中央研究院'
+  }).addTo(map);
+
+  // 標記關鍵地理節點
+  L.marker([23.218, 120.478]).addTo(map).bindPopup('<b>東口導水堰</b><br>曾文溪自然水文在此被截斷');
+  L.marker([23.105, 120.275]).addTo(map).bindPopup('<b>新市南科園區</b><br>昔日五千年史前聚落與台江內海邊緣');
+  L.marker([23.065, 120.065]).addTo(map).bindPopup('<b>曾文溪出海口</b><br>七股黑面琵鷺保護區與潟湖濕地');
+
+  // 綁定透明度滑桿事件
+  const opacitySlider = document.getElementById('opacitySlider');
+  const opacityVal = document.getElementById('opacityVal');
+  opacitySlider.addEventListener('input', (e) => {
+    const val = e.target.value;
+    opacityVal.textContent = val + '%';
+    if (historyLayer) historyLayer.setOpacity(val / 100);
+  });
+}
+
+// 切換不同年代的歷史地圖圖層
+window.switchHistoryLayer = function(layerCode, btnEl) {
+  if (!map || !historyLayer) return;
+  document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+
+  const newUrl = `https://sinica.edu.tw{layerCode}-jpg-{z}-{x}-{y}`;
+  historyLayer.setUrl(newUrl);
+};
+
+window.addEventListener('load', initHistoryMap);

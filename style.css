@@ -89,3 +89,61 @@ p.lead.center { margin: 0 auto 1.5rem; }
 }
 footer { text-align: center; padding: 2.5rem 1rem; font-size: 0.85rem; color: var(--text-muted); background: #070b0d; }
 @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } .nav-links { display: none; } }
+/* 百年歷史地圖互動區塊 */
+.map-box {
+  margin: 2.5rem auto 1rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 14px;
+  padding: 1.2rem;
+  text-align: left;
+}
+.map-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.map-layers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.map-btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.45rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: 0.25s;
+}
+.map-btn:hover { background: rgba(56, 189, 248, 0.2); }
+.map-btn.active {
+  background: var(--water);
+  color: #071318;
+  font-weight: 700;
+  border-color: var(--water);
+}
+.map-opacity {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+#historyMap {
+  width: 100%;
+  height: 460px;
+  border-radius: 10px;
+  z-index: 1;
+}
+.map-caption {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.7rem;
+  text-align: right;
+}
