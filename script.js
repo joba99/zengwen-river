@@ -91,31 +91,49 @@ async function loadReservoirData() {
 
 loadReservoirData();
 
-// 4. 第七幕：中研院《臺灣百年歷史地圖》WMTS 互動地圖模組
+// 4. 第七幕：自動載入 Leaflet 地圖引擎並初始化中研院《臺灣百年歷史地圖》
 let map, historyLayer;
 
-function initHistoryMap() {
+function loadLeafletAndInit() {
   const mapContainer = document.getElementById('historyMap');
   if (!mapContainer) return;
 
-  // 若 Leaflet 尚未載入完成，延遲 0.5 秒重試
-  if (typeof L === 'undefined') {
-    setTimeout(initHistoryMap, 500);
-    return;
+  // 若尚未載入 Leaflet CSS，自動插入至網頁
+  if (!document.getElementById('leaflet-css')) {
+    const link = document.createElement('link');
+    link.id = 'leaflet-css';
+    link.rel = 'stylesheet';
+    link.href = 'https://' + '://unpkg.com';
+    document.head.appendChild(link);
   }
+
+  // 若尚未載入 Leaflet JS，動態建立 script 標籤載入，載入完成後立刻啟動地圖
+  if (typeof L === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://' + '://unpkg.com';
+    script.onload = () => buildMap();
+    document.body.appendChild(script);
+  } else {
+    buildMap();
+  }
+}
+
+function buildMap() {
+  // 避免重複初始化
+  if (map) return;
 
   // 預設座標對準曾文溪中下游與台江內海交界（麻豆、善化、七股一帶）
   map = L.map('historyMap').setView([23.135, 120.165], 12);
 
-  // 底層：現代衛星影像（使用字串拼接避免複製時網址被縮短）
-  const esriHost = 'https://' + '://arcgisonline.com{z}/{y}/{x}';
-  L.tileLayer(esriHost, {
+  // 底層：現代衛星影像（Esri World Imagery）
+  const esriUrl = 'https://' + '://arcgisonline.com{z}/{y}/{x}';
+  L.tileLayer(esriUrl, {
     attribution: '現代衛星底圖 © Esri'
   }).addTo(map);
 
   // 疊加層：中研院 1904 年《臺灣堡圖》
-  const sinicaHost = 'https://' + 'gis.sinica.edu.tw/tileserver/file-exists.php?img=JM20K_1904-jpg-{z}-{x}-{y}';
-  historyLayer = L.tileLayer(sinicaHost, {
+  const sinicaUrl = 'https://' + 'gis.sinica.edu.tw/tileserver/file-exists.php?img=JM20K_1904-jpg-{z}-{x}-{y}';
+  historyLayer = L.tileLayer(sinicaUrl, {
     opacity: 0.8,
     attribution: '歷史地圖 © 中央研究院'
   }).addTo(map);
@@ -134,8 +152,8 @@ function initHistoryMap() {
     if (historyLayer) historyLayer.setOpacity(val / 100);
   });
 
-  // 確保地圖容器尺寸完全展開，避免灰屏
-  setTimeout(() => { map.invalidateSize(); }, 400);
+  // 強制刷新地圖容器尺寸，確保圖磚完整鋪滿
+  setTimeout(() => { map.invalidateSize(); }, 300);
 }
 
 // 切換不同年代的歷史地圖圖層
@@ -148,4 +166,9 @@ window.switchHistoryLayer = function(layerCode, btnEl) {
   historyLayer.setUrl(newUrl);
 };
 
-window.addEventListener('load', initHistoryMap);
+// 網頁載入後立即啟動
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadLeafletAndInit);
+} else {
+  loadLeafletAndInit();
+}
