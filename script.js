@@ -48,7 +48,7 @@ async function loadReservoirData() {
       const data = await res.json();
 
       if (data && data.length > 0) {
-        const latest = data;
+        const latest = data[0]; // 取最新一筆資料
         const totalCapacity = 48600; // 曾文水庫最新有效庫容（萬立方公尺）
         const currentStorage = parseFloat(latest.EffectiveStorage);
         const pct = ((currentStorage / totalCapacity) * 100).toFixed(1);
