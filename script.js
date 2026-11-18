@@ -90,3 +90,88 @@ async function loadReservoirData() {
 }
 
 loadReservoirData();
+
+ // 4. 第七幕：使用 Cloudflare 急速節點載入 Leaflet 並顯示中研院《臺灣百年歷史地圖》
+let map, historyLayer;
+
+function loadLeafletAndInit() {
+  const mapContainer = document.getElementById('historyMap');
+  if (!mapContainer) return;
+
+  // 載入 Cloudflare 節點的 Leaflet CSS
+  if (!document.getElementById('leaflet-css')) {
+    const link = document.createElement('link');
+    link.id = 'leaflet-css';
+    link.rel = 'stylesheet';
+    link.href = 'https://' + '://cloudflare.com';
+    document.head.appendChild(link);
+  }
+
+  // 載入 Cloudflare 節點的 Leaflet JS
+  if (typeof L === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://' + '://cloudflare.com';
+    script.onload = () => buildMap();
+    script.onerror = () => {
+      mapContainer.innerHTML = '<p style="padding:2rem;color:#f87171;">地圖引擎載入受阻，請檢查網路連線後重新整理。</p>';
+    };
+    document.body.appendChild(script);
+  } else {
+    buildMap();
+  }
+}
+
+function buildMap() {
+  if (map) return;
+
+  // 預設座標對準曾文溪中下游與台江內海交界（麻豆、善化、七股一帶）
+  map = L.map('historyMap').setView([23.135, 120.165], 12);
+
+  // 底層：現代衛星影像（Esri World Imagery）
+  const esriUrl = 'https://' + '://arcgisonline.com{z}/{y}/{x}';
+  L.tileLayer(esriUrl, {
+    attribution: '現代衛星底圖 © Esri'
+  }).addTo(map);
+
+  // 疊加層：中研院 1904 年《臺灣堡圖》
+  const sinicaUrl = 'https://' + 'gis.sinica.edu.tw/tileserver/file-exists.php?img=JM20K_1904-jpg-{z}-{x}-{y}';
+  historyLayer = L.tileLayer(sinicaUrl, {
+    opacity: 0.8,
+    attribution: '歷史地圖 © 中央研究院'
+  }).addTo(map);
+
+  // 標記關鍵地理節點
+  L.marker([23.218, 120.478]).addTo(map).bindPopup('<b>東口導水堰</b><br>曾文溪自然水文在此被截斷');
+  L.marker([23.105, 120.275]).addTo(map).bindPopup('<b>新市南科園區</b><br>昔日五千年史前聚落與台江內海邊緣');
+  L.marker([23.065, 120.065]).addTo(map).bindPopup('<b>曾文溪出海口</b><br>七股黑面琵鷺保護區與潟湖濕地');
+
+  // 綁定透明度滑桿事件
+  const opacitySlider = document.getElementById('opacitySlider');
+  const opacityVal = document.getElementById('opacityVal');
+  opacitySlider.addEventListener('input', (e) => {
+    const val = e.target.value;
+    opacityVal.textContent = val + '%';
+    if (historyLayer) historyLayer.setOpacity(val / 100);
+  });
+
+  // 強制刷新地圖容器尺寸，確保圖磚完整鋪滿
+  setTimeout(() => { map.invalidateSize(); }, 300);
+}
+
+// 切換不同年代的歷史地圖圖層
+window.switchHistoryLayer = function(layerCode, btnEl) {
+  if (!map || !historyLayer) return;
+  document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+
+  const newUrl = 'https://' + `gis.sinica.edu.tw/tileserver/file-exists.php?img=${layerCode}-jpg-{z}-{x}-{y}`;
+  historyLayer.setUrl(newUrl);
+};
+
+// 網頁載入後立即啟動
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadLeafletAndInit);
+} else {
+  loadLeafletAndInit();
+}
+  
